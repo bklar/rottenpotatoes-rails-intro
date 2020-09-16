@@ -12,8 +12,31 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
-    @movies=Movie.sort_by(sort_val)
+    @movies=Movie.all
+    @all_ratings = Movie.all_ratings
+    @checked_ratings = params[:ratings] || session[:ratings]
+    @@sort_val = params[:sort_val] || session[:sort_val]
+    
+    @movies=@movies.order(@@sort_val)
+    
+    if @checked_ratings == nil
+      @checked_ratings = @all_ratings
+      session[:sort_val] = @@sort_val
+    else
+      session[:ratings] = @checked_ratings
+      session[:sort_val] = @@sort_val
+      
+      #Select only the movies with the selected ratings
+      @movies=Movie.where(:rating => @checked_ratings.keys)
+    end
+    
+    #sort movies based on the value at :sort_val
+    #@movies=@movies.order(@@sort_val)
+    if @@sort_val == 'title'
+      @title_header = 'highlight'
+    elsif @@sort_val == 'release_date'
+      @release_header ='highlight'
+    end
   end
 
   def new
